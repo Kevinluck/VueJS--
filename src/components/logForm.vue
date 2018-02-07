@@ -19,12 +19,13 @@
         </div>
         <span class="g-form-error">{{ pwdError.pwdErrorMsg }}</span>
       </div>
+      <p>{{ errorTip }}</p>
       <div class="g-form-line">
         <div class="g-form-btn">
           <a class="button" @click="login">登录</a>
         </div>
       </div>
-      <p>{{ errorTip }}</p>
+
     </div>
   </div>
 </template>
@@ -96,7 +97,7 @@
         }
         axios.get('api/login')
           .then(res => {
-            console.log(res);
+            this.$session.set('username', res.data.username);
             this.$emit('login-success', res.data);
           })
           .catch(error => {

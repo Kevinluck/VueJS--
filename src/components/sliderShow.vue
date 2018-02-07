@@ -1,7 +1,7 @@
 <template>
   <div class="slide-show" @mouseover="clearInterval" @mouseout="runAuto">
     <div class="slide-img">
-      <a>
+      <a @click="toProduct">
         <transition name="slide-trans">
           <img v-if="isShow" :src="slides[nowIndex].src">
         </transition>
@@ -18,11 +18,18 @@
       </li>
       <li @click="goto(nextIndex)">&gt;</li>
     </ul>
+    <pb-dialog :is-show='isShowLoginTip' @on-close="closeLoginDlg">
+      <div>请先登录!</div>
+    </pb-dialog>
   </div>
 </template>
 
 <script>
+import VDialog from '../components/base/dialog';
 export default {
+  components: {
+    PbDialog: VDialog
+  },
   props: {
     slides: {
       type: Array,
@@ -36,7 +43,8 @@ export default {
   data () {
     return {
       nowIndex: 0,
-      isShow: true
+      isShow: true,
+      isShowLoginTip: false
     }
   },
   computed: {
@@ -70,9 +78,18 @@ export default {
     },
     clearInterval () {
       clearInterval(this.invId);
+    },
+    toProduct () {
+      if (this.$session.get('username')) {
+        this.$router.push({path: this.slides[this.nowIndex].href});
+      } else {
+        this.isShowLoginTip = true;
+      }
+    },
+    closeLoginDlg () {
+      this.isShowLoginTip = false;
     }
   },
-
   mounted () {
     this.runAuto();
   }
@@ -111,6 +128,9 @@ export default {
   }
   .slide-img {
     width: 100%;
+  }
+  .slide-img a {
+    cursor: pointer;
   }
   .slide-img img {
     width: 100%;

@@ -1,15 +1,17 @@
 <template>
-  <div>
+  <div @click="resetComponent">
     <div class="app-head">
       <div class="app-head-inner">
-        <img src="../assets/logo.png">
+        <router-link :to="{path: '/'}">
+          <img src="../assets/logo.png">
+        </router-link>
         <div class="head-nav">
           <ul class="nav-list">
             <li>{{ username }}</li>
             <li v-if="username === ''" @click="showLogDialog">登录</li>
             <li class="nav-pile">|</li>
             <li v-if="username === ''" @click="showRegDialog">注册</li>
-            <li v-if="username !== ''">退出</li>
+            <li v-if="username !== ''" @click="showLogoutDialog">退出</li>
             <li class="nav-pile">|</li>
             <li @click="showAboutDialog">关于</li>
           </ul>
@@ -21,37 +23,56 @@
         <router-view></router-view>
       </keep-alive>
     </div>
-    <div class="app-footer">
-      <!--<p>© 2016 fishenal MIT</p>-->
-    </div>
     <pb-dialog :is-show="isShowAboutDialog" @on-close="closeDialog('isShowAboutDialog')">
       <p>about</p>
     </pb-dialog>
     <pb-dialog :is-show="isShowRegDialog" @on-close="closeDialog('isShowRegDialog')">
-      <reg-form></reg-form>
+      <reg-form @register-success="registerSuccess" @register-failed="registerFailed"></reg-form>
+    </pb-dialog>
+    <pb-dialog :is-show="isShowRegSuccess" @on-close="closeDialog('isShowRegSuccess')">
+      注册成功!
+    </pb-dialog>
+    <pb-dialog :is-show="isShowRegFailed" @on-close="closeDialog('isShowRegFailed')">
+      注册失败!
     </pb-dialog>
     <pb-dialog :is-show="isShowLogDialog" @on-close="closeDialog('isShowLogDialog')">
       <log-form @login-success="loginSuccess"></log-form>
+    </pb-dialog>
+    <pb-dialog :is-show="isShowLogoutDialog" @on-close="closeDialog('isShowLogoutDialog')">
+      <p>是否确认退出？</p>
+      <p>
+        <a class="button" @click="defineLogout">确定</a>
+        <a class="button" @click="cancelLogout">取消</a>
+      </p>
     </pb-dialog>
   </div>
 </template>
 
 <script>
-import Dialog from './dialog';
+import Dialog from './base/dialog';
 import LogForm from './logForm';
 import RegForm from './regForm';
+import { eventBus } from '../eventBus';
 export default {
   components: {
     PbDialog: Dialog,
     LogForm,
-    RegForm
+    RegForm,
   },
   data () {
     return {
       isShowAboutDialog: false,
       isShowRegDialog: false,
       isShowLogDialog: false,
-      username: ''
+      isShowRegSuccess: false,
+      isShowRegFailed: false,
+      isShowLogoutDialog: false,
+      username: '',
+    }
+  },
+  mounted () {
+    if (this.$session.get('username')) {
+      this.username = this.$session.get('username');
     }
   },
   methods: {
@@ -70,6 +91,29 @@ export default {
     loginSuccess (data) {
       this.closeDialog('isShowLogDialog');
       this.username = data.username;
+    },
+    registerSuccess () {
+      this.closeDialog('isShowRegDialog');
+      this.isShowRegSuccess = true;
+    },
+    registerFailed () {
+      this.closeDialog('isShowRegDialog');
+      this.isShowRegFailed = true;
+    },
+    resetComponent () {
+      eventBus.$emit('reset-component');
+    },
+    showLogoutDialog () {
+      this.isShowLogoutDialog = true;
+    },
+    defineLogout () {
+      this.isShowLogoutDialog = false;
+      this.$session.remove('username');
+      this.username = '';
+      this.$router.push('/');
+    },
+    cancelLogout () {
+      this.isShowLogoutDialog = false;
     }
   }
 }

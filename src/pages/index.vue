@@ -33,9 +33,7 @@
           <div class="index-board-item-inner" >
             <h2>{{item.title}}</h2>
             <p>{{item.description}}</p>
-            <div class="index-board-button">
-
-            </div>
+            <div class="index-board-button"></div>
           </div>
         </div>
       </div>
@@ -46,11 +44,13 @@
 <script>
 import axios from 'axios';
 import slideShow from '../components/sliderShow';
+import VDialog from '../components/base/dialog';
 export default {
   components: {
-    slideShow
+    slideShow,
+    PbDialog: VDialog
   },
-  // 加载完组件执行created方法
+  // 加载完组件执行mounted方法
   mounted () {
     axios.get('api/getNewsList')
       .then(res => {
@@ -73,6 +73,7 @@ export default {
       newsList: [],
       slides: [],
       slideSpeed: 3000,
+      //isShowLoginTip: false,
       boardList: [
         {
           title: '开放产品',
